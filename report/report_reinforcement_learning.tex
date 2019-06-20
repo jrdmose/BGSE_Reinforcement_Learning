@@ -127,7 +127,7 @@ $$
 R_{k}=\left\{\begin{array}{ll}{1,} & {\text { with probability } p_{I_{k}}} \\ {0,} & {\text { otherwise }}\end{array}\right.
 $$
 
-The rewards are received with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$. Given the environment set-up, we define a learning algorithm in order to find the optimal policy $\pi_{\theta_{k}}$. As instructed, we use a temporal difference actor critic algorithm to learn the optimal weight parameters $\theta_{k+1}=\theta_{k}+\alpha_{k} g_{k}$. The arguments our algorithm takes are:
+The rewards are received with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$. Given the environment set-up, we define a learning algorithm in order to find the optimal policy $\pi_{\theta_{k}}$. We use the policy gradient method to learn the optimal weight parameters $\theta_{k+1}=\theta_{k}+\alpha_{k} g_{k}$. The arguments our algorithm takes are:
 
 \begin{enumerate}
 	\item Enviroment: Takes delta as argument and react to actions paying 1 or 0 with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$.
@@ -140,7 +140,7 @@ The rewards are received with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$
 	\item Beta: Learning rate for the value function
 \end{enumerate}
 
-Our simulation function takes the number of steps and draws, at each training step, a pair of action and the according reward, updating the policy based on the policy gradient.
+The following plots show some training results obtained by averaging over various training runs, using different random states to initialize.
 
    \begin{figure}[!htb]
         \center{\includegraphics[width=\textwidth]
@@ -148,7 +148,7 @@ Our simulation function takes the number of steps and draws, at each training st
         \caption{\label{fig:my-label} Convergence of the algorithm}
       \end{figure}
 
-The first plot shows the mean actions taken over the training steps for various seeds and the corresponding standard deviation. The second plot shows the convergence of the policy function and the third shows the evolution of the weighs $\theta$. \\
+The first plot shows the mean of actions taken over the training steps and the corresponding standard deviation. The second plot shows the convergence of the policy function and the third shows the evolution of the weights $\theta$. \\
 
 Note that the policy values are plotted together with the standard deviation over different seeds. Policy function values cannot be higher than 1 or lower than 0, however, mean +- sd can be higher than 1. The main objective is to illustrate the volatility of the measure.
 
@@ -170,7 +170,7 @@ Task: What is the influence of $\gamma$ on the algorithm.
 &=\left(  \phi(x, a)-\sum_{b} \pi_{\theta}(b|x) \phi(x, b)\right)R_{k}
 \end{align}
 
-\textbf{The discount factor $\gamma$ cancels out.} Further, since the state in this MDP does not change, we do not have to take into account the consequences of our actions now for our future as we adjust our policy, therefore the choice of  $\gamma$ should intuitively not play a role in our policy gradient.
+\textbf{The discount factor $\gamma$ cancels out.} Further, since the state in this MDP does not change, we do not have to take into account the consequences of our actions now for our future as we adjust our policy. Therefore the choice of  $\gamma$ should intuitively not play a role in our policy gradient.
 
 \subsection*{Question 2.2}
 
@@ -195,7 +195,7 @@ Task: Find the best step size and policy as function of $\Delta$. \\
    \begin{figure}[!htb]
         \center{\includegraphics[width=\textwidth]
         {../img/policy_gradient_convergence_deltas.png}}
-        \caption{\label{fig:my-label} Influence of delt}
+        \caption{\label{fig:my-label} Influence of delta}
       \end{figure}
 
 \newpage
@@ -210,27 +210,27 @@ First we define the standard UCB algorithm for our bandit problem. As described 
 
 $$I_{t}=\arg \max _{i \in\{1,2\}}\left(\widehat{\mu}_{t, i}+\sqrt{\frac{2 \ln t}{N_{t, i}}}\right)$$
 
-we initialize the algorithm by forcing two trials of each action. After taking an action we store the resulting reward and update our mean parameter $\mu{t,i}$.
+we initialize the algorithm by forcing two trials of each action. After taking an action we store the resulting reward and update our mean estimator $\mu_{t,i}$.
 
-The following plot shows the total reward for $T=10,000$ rounds as a function of $\Delta$ of the environment:
+The following plot shows the total reward for $T=10,000$ rounds as a function $\Delta$ of the environment:
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[scale = 0.4]{UCB_reward}
 	\caption{}
 \end{figure}
 
-One can easily see that larger values of $\Delta$ lead to greater total rewards. The intuition behind this is that large $\Delta$ lead to a clearer seperation between the expected rewards of each action. For very small $\Delta$, the expected rewards of each action are almost $\frac{1}{2}$. Unsurprisingly, the total reward for a $\Delta$ of 0 is 5000. Conversely, for a $\Delta$ of 0.5 the total reward is almost 10,000, but not quite. This is due to the fact that we still have to run a tiny amount of trials to get convergence of the estimated mean to the true value. After that we always pick the right action, which almost certainly results in a reward.
+One can easily see that larger values of $\Delta$ lead to greater total rewards. The intuition behind this is that large $\Delta$ lead to a clear seperation between the expected rewards of each action. For very small $\Delta$, the expected rewards of each action are almost $\frac{1}{2}$. Unsurprisingly, the total reward for a $\Delta$ of 0 is 5000. Conversely, for a $\Delta$ of 0.5 the total reward is almost 10,000, but not quite. This is due to the fact that we still have to run a tiny amount of trials to get convergence of the estimated mean to the true value. After that we always pick the right action, which almost certainly results in a reward.
 
 \subsection*{Question 3.2}
 
 The $\epsilon$-greedy algorithm works in the following way:
 
-For a given probability $\epsilon$, either choose a uniformly random action, or choose the action which has the maximum expected reward based on the previously recorded rewards. The value of $\epsilon$ drops in each step, resulting in a smaller and smaller chance of taking random actions. Consequently, the drop in $\epsilon$ can be seen as a switch from exploring the environment to exploiting it based on the learned features. $\epsilon$ in this case is set as $\epsilon = c/t$ where $c$ is a constant.
+For a given probability $\epsilon$, either choose a uniformly random action, or choose the action which has the maximum expected reward based on the previously recorded rewards. The value of $\epsilon$ drops in each step, resulting in a smaller and smaller chance of taking random actions. Consequently, the drop in $\epsilon$ can be seen as a switch from exploring the environment to exploiting it based on the reward history. $\epsilon$ in this case is set as $\epsilon = c/t$ where $c$ is a constant.
 
 The following plot shows the total reward for a range of values of $c$ and $\Delta$.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[scale = 1]{Eps_greedy_reward}
 	\caption{}
@@ -250,7 +250,7 @@ The last plot shows the combined results of all three algorithms for our small b
 	\caption{}
 \end{figure}
 
-All algorithms have similar total rewards for a given $\Delta$, with UCB and Policy-Gradients being slightly better than $\epsilon$-greedy for larger $\Delta$. This is probably due to the fact, that the problem at hand is a simple one, with only one state and two possible actions. In this case we don't loose too much if we use a "simple" policy like UCB, over the more complex policy gradient method.
+All algorithms have similar total rewards for a given $\Delta$ with UCB and Policy-Gradients being slightly better than $\epsilon$-greedy for larger $\Delta$. This is probably due to the fact that the problem at hand is a simple one, with only one state and two possible actions. In this case we don't loose too much if we use a "simple" policy like UCB, over the more complex policy gradient method. Further, finding the optimal learning rate for the policy gradient method is hard, whereas UCB is much simpler to implement and fine tune. 
 
 
 \end{document}
