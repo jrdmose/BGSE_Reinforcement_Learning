@@ -56,7 +56,7 @@
 \usepackage{algorithm}
 \usepackage{tikz}
 \usepackage[noend]{algpseudocode}
-\graphicspath{ {../01_Figures/} }
+\graphicspath{ {../img/} }
 \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt     
 
 
@@ -176,21 +176,54 @@ Best step size and policy as function of $\Delta$
 
 \section*{Question 3}
 
-Performance of standard UCB and $\epsilon$-greedy algorithms 
-
+Performance of some basic algorithms on the same bandit problem
 \subsection*{Question 3.1}
 
-implement UCB and plot reward after 1000
+First we define the standard UCB algorithm for our bandit problem. As described in the question, at each iteration of the algorithm, we start by choosing an "arm" or action in this case by finding 
+
+$$I_{t}=\arg \max _{i \in\{1,2\}}\left(\widehat{\mu}_{t, i}+\sqrt{\frac{2 \ln t}{N_{t, i}}}\right)$$
+
+we initialize the algorithm by forcing two trials of each action. After taking an action we store the resulting reward and update our mean parameter $\mu{t,i}$. 
+
+The following plot shows the total reward for $T=10,000$ rounds as a function of $\Delta$ of the environment:
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale = 0.4]{UCB_reward}
+	\caption{}
+\end{figure}
+
+One can easily see that larger values of $\Delta$ lead to greater total rewards. The intuition behind this is that large $\Delta$ lead to a clearer seperation between the expected rewards of each action. For very small $\Delta$, the expected rewards of each action are almost $\frac{1}{2}$. Unsurprisingly, the total reward for a $\Delta$ of 0 is 5000. Conversely, for a $\Delta$ of 0.5 the total reward is almost 10,000, but not quite. This is due to the fact that we still have to run a tiny amount of trials to get convergence of the estimated mean to the true value. After that we always pick the right action, which almost certainly results in a reward.
 
 \subsection*{Question 3.2}
 
-Implement the $\epsilon$ greedy algorithm for various choices of $t$
+The $\epsilon$-greedy algorithm works in the following way:
+
+For a given probability $\epsilon$, either choose a uniformly random action, or choose the action which has the maximum expected reward based on the previously recorded rewards. The value of $\epsilon$ drops in each step, resulting in a smaller and smaller chance of taking random actions. Consequently, the drop in $\epsilon$ can be seen as a switch from exploring the environment to exploiting it based on the learned features. $\epsilon$ in this case is set as $\epsilon = c/t$ where $c$ is a constant.
+
+The following plot shows the total reward for a range of values of $c$ and $\Delta$.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale = 1]{Eps_greedy_reward}
+	\caption{}
+\end{figure}
+
+First we note that similarly to the UCB algorithm, larger values of $\Delta$ lead to higher total rewards. Additionally, for small $c$ and $\Delta$ all total rewards are similar. For greater $\Delta$, with smaller parameter $c$, the algorithm converges quicker to the optimal policy. This can be seen in the higher overall rewards. Again, the intuition is that for high $\Delta$ we don't need to explore the environment as in depth as before, so smaller $c$ will lead to a smaller amount of trials in which we randomly explore the environment. 
+
+\newpage
 
 \subsection*{Question 3.3}
 
-Contrast new results with results obtained for policy gradient methods
+The last plot shows the combined results of all three algorithms for our small bandit problem with $T=10000$ for all runs. 
 
-Which algorithm is best and why?
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale = 0.65]{algorithms_comparison}
+	\caption{}
+\end{figure}
+
+All algorithms have similar total rewards for a given $\Delta$, with UCB and Policy-Gradients being slightly better than $\epsilon$-greedy for larger $\Delta$. This is probably due to the fact, that the problem at hand is a simple one, with only one state and two possible actions. In this case we don't loose too much if we use a "simple" policy like UCB, over the more complex policy gradient method.
 
 
 \end{document}
