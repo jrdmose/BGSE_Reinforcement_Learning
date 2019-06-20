@@ -91,16 +91,80 @@
 
 \section*{Question 1}
 
-Gradient of the function
+Let $\phi : X x A \rightarrow \mathbb{R}^{d}$
+
+The task is to compute $\nabla_{\theta}log(\pi_{\theta}(a|x))$ for the Boltzmann policy:
+\begin{equation}
+\pi_{\theta}(a | x)= \frac{e^{\theta^{\top} \phi(x, a)}}{\sum_{b} e^{\theta^{\top} \phi(x, b)}}
+\end{equation}
+
+To answer this, we take logs and the derivative:
+\begin{align}
+\nabla_{\theta} \log \pi_{\theta}(a | x) 
+&=\nabla_{\theta} \log \frac{e^{\theta^{\top} \phi(x, a)}}{\sum_{b} e^{\theta^{\top} \phi(x, b)}}  \\
+&=\nabla_{\theta} \log e^{\theta^{\top} \phi(x, a)}-\nabla_{\theta} \log \sum_{b} e^{\theta^{\top} \phi(x, b)} \\
+&=\phi(x, a)-\frac{1}{\sum_{b} e^{\theta^{\top} \phi(x, b)}}\sum_{b'} e^{\theta^{\top} \phi(x, b')} \phi(x, b') \\
+& =\phi(x, a)-\sum_{b'} \frac{e^{\theta^{\top} \phi(x, b')} }{\sum_{b} e^{\theta^{\top} \phi (x, b)} } \phi(x, b')
+\end{align}
+
+Finally obtaining:
+\begin{equation}
+\nabla_{\theta}log(\pi_{\theta}(a|x)) = \phi(x, a)-\sum_{b} \pi_{\theta}(b|x) \phi(x, b)
+\end{equation}
+
+Which can be rewritten as:
+\begin{equation}
+\nabla_{\theta} \log \pi_{\theta}(a| x)=\phi(x, a)-\mathbb{E}_{\pi_{\theta}}[\phi(x, \cdot)]
+\end{equation}
 
 
 \section*{Question 2}
+\textbf{Task: Run a policy gradient algorithm with a Boltzmann policy using $\phi_i(x,a) = 1_{(a=1)}$} \\
 
-MDP
+The MDP we study has one state $x$ (that is, $X=\{x\}$) and two actions $\mathcal{A}=\left\{a_{1}, a_{2}\right\}$. The rewards are defined as follows: 
+
+$$
+R_{k}=\left\{\begin{array}{ll}{1,} & {\text { with probability } p_{I_{k}}} \\ {0,} & {\text { otherwise }}\end{array}\right.
+$$
+
+The rewards are received with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$. 
+
+Given the environment set-up, we define a learning algorithm in order to find the optimal policy $\pi_{\theta_{k}}$.  
+
+As instructed, we use a temporal difference actor critic algorithm to learn the optimal weight parameters $\theta_{k+1}=\theta_{k}+\alpha_{k} g_{k}$.
+
+The arguments our algorithm takes are:
+
+\begin{enumerate}
+	\item Enviroment: Takes delta as argument and react to actions paying 1 or 0 with probability $p_{1}=1 / 2$ and $p_{2}=1 / 2+\Delta$. 
+	\item Gamma: Discount factor for future rewards. 
+	\item Policy: In this case we used Boltzmann policy as defined previously
+	\item Seed: We choose a random seed to make sure it is possible to reproduce the simulations.  
+	\item Step type: Here we defined a fixed learning rate and also different rate decay in function of the number of steps.
+	\item Delta: The environment parameter that gives how much the reward from action 2 is better than action 1.
+	\item Weights $\theta$: Weights of our policy
+	\item Beta: Learning rate for the value function
+\end{enumerate}
+
+Our simulation function takes the number of steps and draws, at each training step, a pair of action and the according reward, updating the policy based on the policy gradient.
 
 \subsection*{Question 2.1}
 
-Influence of $\gamma$ on algorithm
+Influence of $\gamma$ on algorithm:
+\\
+\\
+\textbf{We find that $\gamma$ does not play a role in this policy gradient.} We get this result because we use the particularly simple estimation of the expectation in the policy gradient function suggested in the hint. When we set $h(x)=\gamma V^{\pi_{\theta_{k}}}(x)$, take a single sample to approximate the expectation, and take $\widehat{Q}^{\pi_{\theta_{k}}}\left(x, A_{k}\right)=R_{k}+\gamma V^{\pi_{\theta_{k}}}(x)$ , the expression for the policy gradient simplifies as follows:
+
+\begin{align} \nabla_{\theta} \rho(\theta) 
+&=\sum_{(x, a) \in \mathcal{X} \times \mathcal{A}} \mu_{\theta}(x) \pi_{\theta}(a | x) \nabla_{\theta} \log \pi_{\theta}(a | x)\left(Q^{\pi_\theta}(x, a)-h(x)\right) \\
+&=\mathbb{E}_{X \sim \mu_{\theta}, A \sim \pi_{\theta}(\cdot | X)}\left[\nabla_{\theta} \log \pi_{\theta}(A | X)\left(Q^{\pi_{\theta}}(X, A)-h(X)\right)\right] \\
+&\approx \nabla_{\theta} \log \pi_{\theta}(a | x)  \left(\widehat{Q^{\pi_{\theta}}(x, a)}-h(x)\right) \\
+&=\nabla_{\theta} \log \pi_{\theta}(a | x)  \left(R_{k}+\gamma V^{\pi_{\theta_{k}}}(x) - \gamma V^{\pi_{\theta_{k}}}(x)\right) \\
+&=\nabla_{\theta} \log \pi_{\theta}(a | x)  R_{k} \\
+&=\left(  \phi(x, a)-\sum_{b} \pi_{\theta}(b|x) \phi(x, b)\right)R_{k} 
+\end{align}
+
+\textbf{The discount factor $\gamma$ cancels out.} Further, since the state in this MDP does not change, we do not have to take into account the consequences of our actions now for our future as we adjust our policy, therefore the choice of  $\gamma$ should intuitively not play a role in our policy gradient.
 
 \subsection*{Question 2.2}
 
